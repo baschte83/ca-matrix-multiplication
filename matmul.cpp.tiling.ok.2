@@ -1,0 +1,70 @@
+#include <stdlib.h>
+#include "matmul.h"
+
+Matrix Allocate2ndMatrix(int height, int width, int init);
+
+void matmul( float*, const float*, const float*, unsigned int, unsigned int, unsigned int);
+
+////////////////////////////////////////////////////////////////////////////////
+//! C = A * B
+//! @param C          result matrix
+//! @param A          matrix A 
+//! @param B          matrix B
+//! @param hA         height of matrix A
+//! @param wB         width of matrix B
+////////////////////////////////////////////////////////////////////////////////
+
+/* You'll need to modify this function such that matrix B is accessed
+ * correctly once you change the memory layout to column-major. */
+void matmul(float* C, const float* A, const float* B, unsigned int hA, 
+    unsigned int wA, unsigned int wB)
+{
+	for (unsigned int i = 0; i<wA*wB; i++) {
+		C[i] = 0;
+	}
+  unsigned int tb = 512;
+  for (unsigned int i = 0; i < (wA/tb); i++){
+            for (unsigned int a = 0; a < tb; a++){
+                for (unsigned int j = 0; j < (wA/tb); j++){
+                    for(unsigned int b = 0; b < tb; b++){
+                        for (unsigned int z = 0; z < wA/tb; z++){
+                            for (unsigned int e = 0; e < wA/tb; e++){
+                                C[a*tb+tb*i*wA + b*wA + z] +=  B[j*tb+tb*a*wA + z*wA + e] * A[j*tb+tb*i*wA + b*wA + e];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+}
+
+// Allocate a matrix of dimensions height*width
+Matrix Allocate2ndMatrix(int height, int width)
+{
+  Matrix M;
+  M.width = M.pitch = width;
+  M.height = height;
+  int size = M.width * M.height;
+  M.elements = NULL;
+
+  M.elements = (float*) malloc(size*sizeof(float));
+
+  /* This is a row-major allocation and initialization.
+   * You need to modify this function which is only called
+   * for Matrix B such that a column-major ordering is
+   * performed. */
+/*  for(unsigned int i = 0; i < M.height * M.width; i++)
+  {
+    M.elements[i] = (rand() / (float)RAND_MAX);
+  }*/
+
+  for(unsigned int i = 0; i < M.height; i++)
+  {
+    for(unsigned int j = 0; j < M.width; j++)
+    {
+      M.elements[i + j * M.width] = (rand() / (float)RAND_MAX);
+    }
+  }
+  return M;
+}	
+
